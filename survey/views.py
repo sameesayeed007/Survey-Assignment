@@ -5,6 +5,8 @@ from rest_framework.views import APIView
 from user.models import User
 from survey.models import Survey,Question,AnswerChoices
 from rest_framework import permissions, status
+from survey.serializers import SurveySerializer,SurveyInfoSerializer
+
 
 # Create your views here.
 
@@ -118,6 +120,53 @@ def createQuestion(request):
             return JsonResponse({'success':False, 'message': 'This admin does not exist.'}, status=status.HTTP_404_NOT_FOUND)
 
     
+    except Exception as e:
+
+        errors = str(e)
+        return JsonResponse({'success':False, 'message': 'Some error occurred.','errors': errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#This API will display the list of all the active surveys
+@api_view(["GET"])
+def showSurveyList(request):
+    try:
+        try:
+            surveys = Survey.objects.filter(is_active= True)
+        except:
+            surveys = None
+
+        if surveys:
+            
+            survey_serializer = SurveySerializer(surveys,many=True)
+            return JsonResponse({'success':True,'message':'Survey data is shown.','data':survey_serializer.data},status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({'success':False,'message':'Survey data not found.'},status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+
+        errors = str(e)
+        return JsonResponse({'success':False, 'message': 'Some error occurred.','errors': errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+#This API will display a specific survey with its questions 
+@api_view(["GET"])
+def showSpecificSurvey(request,survey_id):
+    try:
+        try:
+            surveys = Survey.objects.get(id= survey_id)
+        except:
+            surveys = None
+
+
+        if surveys:
+            
+            survey_serializer = SurveyInfoSerializer(surveys,many=False)
+            return JsonResponse({'success':True,'message':'Survey data is shown.','data':survey_serializer.data},status=status.HTTP_200_OK)
+
+        else:
+            return JsonResponse({'success':False,'message':'Survey data not found.'},status=status.HTTP_404_NOT_FOUND)
+
+
     except Exception as e:
 
         errors = str(e)
