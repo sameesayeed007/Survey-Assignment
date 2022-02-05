@@ -29,4 +29,19 @@ class AnswerChoices(models.Model):
     content = models.CharField(max_length=255,null=True,blank=True,default='')
     question_id = models.IntegerField(blank=False, default=-1)
 
+
+class Submission(models.Model):
+    survey_id = models.IntegerField(blank=False, default=-1)
+    user_id = models.IntegerField(blank=False, default=-1)
+    date_created = models.DateTimeField( auto_now_add=True)
+
+class Answers(models.Model):
+    answer = models.CharField(max_length=255,null=False,blank=False,default='')
+    submission_id = models.IntegerField(blank=False, default=-1)
+    question_id = models.IntegerField(blank=False, default=-1)
+    user_id = models.IntegerField(blank=False, default=-1)
+    date_created = models.DateTimeField( auto_now_add=True)
+
+
+
     
