@@ -171,3 +171,63 @@ def showSpecificSurvey(request,survey_id):
 
         errors = str(e)
         return JsonResponse({'success':False, 'message': 'Some error occurred.','errors': errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+#This will be done by the end user. Answers to questions will be created and and submission to a form will be made
+@api_view(["POST"])
+def createSubmission(request):
+    try:
+
+
+        data = {
+        "user_id" : 10,
+        "survey_id" : 1,
+        "answers": [{"question_id":1,"answer":["male"]},
+                    {"question_id":2,"answer":["Cricket","Football"]},
+                    {"question_id":3,"answer":["Ruhul"]},
+                    {"question_id":4,"answer":["22"]},
+                    {"question_id":5,"answer":["3"]}]
+        }
+        # data = request.data
+
+        user_id = data["user_id"]
+        survey_id = data["survey_id"]
+        answers = data["answers"]
+
+
+        try:
+            specificUser = User.objects.get(id=user_id)
+        except:
+            specificUser = None
+
+        if specificUser:
+            if specificUser.is_staff == False:
+                if specificUser.is_active == True:
+                    #Create a submission
+                    specificSubmission = Submission.objects.create(survey_id = survey_id, user_id = user_id )
+                    specificSubmission.save() 
+                    submission_id = specificSubmission.id
+                    #Create the answers 
+                    for k in range(len(answers)):
+                        for m in range(len(answers[k]["answer"])):
+                            #Create an an answer 
+                            specificAnswer = Answers.objects.create(submission_id = submission_id, user_id = user_id, question_id = answers[k]["question_id"],answer =answers[k]["answer"][m])
+                            specificAnswer.save()
+
+                    return JsonResponse({'success':True, 'message': 'Form has been submitted and answers have been recorded.'}, status=status.HTTP_201_CREATED)
+                else:
+                    return JsonResponse({'success':False, 'message': 'This user is not an active user.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                 
+            else:
+                return JsonResponse({'success':False, 'message': 'This user is not a regular user.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        else:
+            return JsonResponse({'success':False, 'message': 'This user does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+    except Exception as e:
+
+        errors = str(e)
+        return JsonResponse({'success':False, 'message': 'Some error occurred.','errors': errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
