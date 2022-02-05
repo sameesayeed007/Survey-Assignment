@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from user.models import User
 from survey.models import Survey,Question,AnswerChoices,Submission,Answers
 from rest_framework import permissions, status
-from survey.serializers import SurveySerializer,SurveyInfoSerializer
+from survey.serializers import SurveySerializer,SurveyInfoSerializer,SubmissionSerializer
 
 
 # Create your views here.
@@ -179,16 +179,16 @@ def createSubmission(request):
     try:
 
 
-        data = {
-        "user_id" : 10,
-        "survey_id" : 1,
-        "answers": [{"question_id":1,"answer":["male"]},
-                    {"question_id":2,"answer":["Cricket","Football"]},
-                    {"question_id":3,"answer":["Ruhul"]},
-                    {"question_id":4,"answer":["22"]},
-                    {"question_id":5,"answer":["3"]}]
-        }
-        # data = request.data
+        # data = {
+        # "user_id" : 10,
+        # "survey_id" : 1,
+        # "answers": [{"question_id":1,"answer":["male"]},
+        #             {"question_id":2,"answer":["Cricket","Football"]},
+        #             {"question_id":3,"answer":["Ruhul"]},
+        #             {"question_id":4,"answer":["22"]},
+        #             {"question_id":5,"answer":["3"]}]
+        # }
+        data = request.data
 
         user_id = data["user_id"]
         survey_id = data["survey_id"]
@@ -226,6 +226,75 @@ def createSubmission(request):
         else:
             return JsonResponse({'success':False, 'message': 'This user does not exist.'}, status=status.HTTP_404_NOT_FOUND)
         
+
+    except Exception as e:
+
+        errors = str(e)
+        return JsonResponse({'success':False, 'message': 'Some error occurred.','errors': errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+#This API will display the list of all the submissions. This will be used in admin's reports section
+@api_view(["GET"])
+def showSubmissionList(request):
+    try:
+        try:
+            submissions = Submission.objects.all()
+        except:
+            submissions = None
+
+        if submissions:
+            
+            submission_serializer = SubmissionSerializer(submissions,many=True)
+            return JsonResponse({'success':True,'message':'Submission data is shown.','data':submission_serializer.data},status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({'success':False,'message':'Submission data not found.'},status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+
+        errors = str(e)
+        return JsonResponse({'success':False, 'message': 'Some error occurred.','errors': errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+#This API will display the list of all the submissions made by a specific end user. This will be used in admin's reports section
+@api_view(["GET"])
+def showSubmissionListSpecificUser(request,user_id):
+    try:
+        try:
+            submissions = Submission.objects.filter(user_id = user_id)
+        except:
+            submissions = None
+
+        if submissions:
+            
+            submission_serializer = SubmissionSerializer(submissions,many=True)
+            return JsonResponse({'success':True,'message':'Submission data is shown.','data':submission_serializer.data},status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({'success':False,'message':'Submission data not found.'},status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+
+        errors = str(e)
+        return JsonResponse({'success':False, 'message': 'Some error occurred.','errors': errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+#This API will display the list of all the submissions of a specific survey. This will be used in admin's reports section
+@api_view(["GET"])
+def showSubmissionListSpecificSurvery(request,survey_id):
+    try:
+        try:
+            submissions = Submission.objects.filter(survey_id = survey_id)
+        except:
+            submissions = None
+
+        if submissions:
+            
+            submission_serializer = SubmissionSerializer(submissions,many=True)
+            return JsonResponse({'success':True,'message':'Submission data is shown.','data':submission_serializer.data},status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({'success':False,'message':'Submission data not found.'},status=status.HTTP_404_NOT_FOUND)
 
     except Exception as e:
 

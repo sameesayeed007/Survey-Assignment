@@ -85,3 +85,40 @@ class SurveyInfoSerializer(serializers.ModelSerializer):
 
         else:
             return []
+
+
+class SubmissionSerializer(serializers.ModelSerializer):
+    user_information = serializers.SerializerMethodField(method_name='get_user_info')
+    survey_information = serializers.SerializerMethodField(method_name='get_survey_info')
+    class Meta:
+        model = Submission
+        fields = "__all__"
+
+    def get_user_info(self,instance):
+        try:
+            specificUser = User.objects.get(id= instance.user_id)
+        except:
+            specificUser = None
+        print(specificUser)
+
+        if specificUser:
+            user_name = specificUser.name
+            user_email = specificUser.email
+            userObj = {"user_name":user_name, "admin_email":user_email}
+            return userObj
+
+        else:
+            return {}
+
+    def get_survey_info(self,instance):
+        try:
+            survey = Survey.objects.get(id= instance.survey_id)
+        except:
+            survey = None
+
+        if survey:
+            survey_serializer = SurveySerializer(survey,many=False)
+            return survey_serializer.data
+
+        else:
+            return {}
