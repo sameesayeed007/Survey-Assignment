@@ -11,10 +11,9 @@ urlpatterns = [
     path('showSubmissionList/', views.showSubmissionList, name ="Show_Submission_List"),
     path('showSubmissionListSpecificSurvery/<int:survey_id>/', views.showSubmissionListSpecificSurvery, name ="Show_Submission_List_Specific_Survey"),
     path('showSubmissionListSpecificUser/<int:user_id>/', views.showSubmissionListSpecificUser, name ="Show_Submission_List_Specific_User"),
+    path('showSubmissionDetails/<int:submission_id>/', views.showSubmissionDetails, name ="Show_Submission_Details"),
     
     
-
-
 
 
 

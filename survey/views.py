@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from user.models import User
 from survey.models import Survey,Question,AnswerChoices,Submission,Answers
 from rest_framework import permissions, status
-from survey.serializers import SurveySerializer,SurveyInfoSerializer,SubmissionSerializer
+from survey.serializers import SurveySerializer,SurveyInfoSerializer,SubmissionSerializer,SubmissionInfoSerializer
 
 
 # Create your views here.
@@ -292,6 +292,29 @@ def showSubmissionListSpecificSurvery(request,survey_id):
         if submissions:
             
             submission_serializer = SubmissionSerializer(submissions,many=True)
+            return JsonResponse({'success':True,'message':'Submission data is shown.','data':submission_serializer.data},status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({'success':False,'message':'Submission data not found.'},status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+
+        errors = str(e)
+        return JsonResponse({'success':False, 'message': 'Some error occurred.','errors': errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+#This will show the submission details of a specific submission (questions and answers of a specific survey). This will be used in the admin's report section
+@api_view(["GET"])
+def showSubmissionDetails(request,submission_id):
+    try:
+        try:
+            submission = Submission.objects.get(id = submission_id)
+        except:
+            submission = None
+
+        if submission:
+            
+            submission_serializer = SubmissionInfoSerializer(submission,many=False)
             return JsonResponse({'success':True,'message':'Submission data is shown.','data':submission_serializer.data},status=status.HTTP_200_OK)
         else:
             return JsonResponse({'success':False,'message':'Submission data not found.'},status=status.HTTP_404_NOT_FOUND)
